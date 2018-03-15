@@ -6,8 +6,14 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
 import re
 import pygal
+from selenium.webdriver.chrome.options import Options
+
+chrome_options = Options()
+chrome_options.add_argument('--headless')
+chrome_options.add_argument('--disable-gpu')
 
 browser = webdriver.Chrome()
+
 browser.set_window_size(1200, 900)
 
 gauge_chart = pygal.Gauge(human_readable=True)  # 初始化图表
@@ -46,9 +52,44 @@ def login():
             break
 
 
+def to_pri_info(my_username):
+    print('正在跳转个人信息页面...')
+    browser.get('http://202.192.18.183/xsgrxx.aspx?xh=' + my_username + '&gnmkdm=N121501')
+    html = browser.page_source
+    print('正在采集')
+    pri_info = {
+        "id": re.findall('<td><span id="xh">(.*?)</span></td>', html, re.S),
+        "photo": re.findall('<td rowspan="6"><img id="xszp" src="(.*?)" alt="照片" align="AbsMiddle"', html, re.S),
+        "name": re.findall('<td><span id="xm">(.*?)</span></td>', html, re.S),
+        "sex": re.findall('<td><span id="lbl_xb">(.*?)</span></td>', html, re.S),
+        "enro_date": re.findall('<td colspan="2"><span id="lbl_rxrq">(.*?)</span></td>', html, re.S),
+        "bir_date": re.findall('<td><span id="lbl_csrq">(.*?)</span></td>', html, re.S),
+        "mid_school": re.findall('<td colspan="2"><span id="lbl_byzx">(.*?)</span></td>', html, re.S),
+        "nation": re.findall('<td><span id="lbl_mz">(.*?)</span></td>', html, re.S),
+        "ori_from": re.findall('</span><span id="lbl_jg">(.*?)</span></td>', html, re.S),
+        "pol_sta": re.findall('<span id="lbl_zzmm">(.*?)</span></td>', html, re.S),
+        "phone": re.findall('<span id="lbl_lxdh">(.*?)</span></td>', html, re.S),
+        "gra_place": re.findall('<span id="lbl_lys">(.*?)</span></td>', html, re.S),
+        "exm_num": re.findall('<span id="lbl_zkzh">(.*?)</span></td>', html, re.S),
+        "birth_palce": re.findall('<span id="lbl_csd">(.*?)</span></td>', html, re.S),
+        "id_number": re.findall('<span id="lbl_sfzh">(.*?)</span></td>', html, re.S),
+        "edu_sta": re.findall('<span id="lbl_CC">(.*?)</span></td>', html, re.S),
+        "department": re.findall('<span id="lbl_xy">(.*?)</span></td>', html, re.S),
+        "home_place": re.findall('<span id="lbl_jtszd">(.*?)</span></td>', html, re.S),
+        "major": re.findall('<span id="lbl_zymc">(.*?)</span></td>', html, re.S),
+        "class": re.findall('<span id="lbl_xzb">(.*?)</span></td>', html, re.S),
+        "english_grade": re.findall('<span id="lbl_YYCJ">(.*?)</span></td>', html, re.S),
+        "study_year": re.findall('<span id="lbl_xz">(.*?)</span></td>', html, re.S),
+        "stu_proof": re.findall('<span id="lbl_xjzt">(.*?)</span></td>', html, re.S),
+        "grade": re.findall('<span id="lbl_dqszj">(.*?)</span></td>', html, re.S),
+        "stu_exm_num": re.findall('<span id="lbl_ksh">(.*?)</span></td>', html, re.S)
+    }
+    print(pri_info)
+
+
 def to_jiaowu(my_username):
     print('正在跳转选课系统...')
-    browser.get('http://202.192.18.182/xf_xsqxxxk.aspx?xh=' + my_username)
+    browser.get('http://202.192.18.185/xf_xsqxxxk.aspx?xh=' + my_username)
     item_num = WebDriverWait(browser, 1000).until(
         EC.presence_of_element_located((By.CSS_SELECTOR, "#dpkcmcGrid_txtPageSize"))
     )
@@ -102,10 +143,11 @@ def save_to_file(content):
 
 def main():
     login()
+    # print(to_pri_info(my_username))
 
     html = to_jiaowu(my_username)
     try:
-        for page in range(1, 11):
+        for page in range(1, 14):
             for item in parse_page(html):
                 print(item)
             html = next_page()
