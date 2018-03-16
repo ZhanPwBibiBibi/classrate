@@ -23,8 +23,11 @@ if __name__ == '__main__':
 
 然后，哇，出结果啦～～
 
+## License
+MIT
 
-### 注意
+
+## 注意
 ```python
 # requirements.txt:
 beautifulsoup4==4.5.3
