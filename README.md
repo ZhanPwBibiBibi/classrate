@@ -1,33 +1,43 @@
 # classrate
-本项目主要用于了解广州大学选修课预选课时的选课情况，以便全面的了解选课信息，避免选择最热门的课程又不至于选择最冷门的课程。
+本项目主要用于GZHU教务系统的信息抓取。（暂未适配其他学校的教务系统）可用于：
+
+* [x] 了解广州大学选修课预选课时的选课情况，以便全面的了解选课信息，避免选择最热门的课程又不至于选择最冷门的课程。
+* [x] 个人信息获取
+* [x] 个人成绩获取
+* [x] 专业课表获取
 
 ## 使用方法
-转到文件所在的目录下，运行：
+使用非常简单，首先确保你以及正确配置了*Webdriver for Chrome*， 并且Chrome的版本在64以上，Chrome版本太低将不支持*headless mode*，然后就十分简单了：
 
 ```python
-python3 spider.py
+from spider import Student
+
+if __name__ == '__main__':
+    student = Student('your_username', 'your_password')
+    student.get_personal_info()
+    student.get_class_table()
+    student.get_personal_score()
+    # 只有当预选课系统开放的时候才有用
+    student.get_pre_class_picked()
 ```
 
-然后会出现界面：
+然后，哇，出结果啦～～
 
-![](https://ws1.sinaimg.cn/large/006tNc79gy1fp6k7v9qmxj30ex04674w.jpg)
 
-在相应的提示后输入学号和密码，selenium就会开始运行，并抓取当前的预选课信息：
+### 注意
+```python
+# requirements.txt:
+beautifulsoup4==4.5.3
+pygal==2.4.0
+selenium==3.4.3
+```
 
-![](https://ws1.sinaimg.cn/large/006tNc79gy1fp6kahg3fij30od073aho.jpg)
+PS. 推荐选择热门程度为0.8-1之间的课程，避免人数过少而不开课，或是人数过多被踢导致要参加惨无人道的抢课大战。
 
-可能教务系统会比较卡，需要短时等待。
 
-完成过后会出现结果的可视化：
 
-![](https://ws4.sinaimg.cn/large/006tNc79gy1fp6kfbef5zj31ao0r4kgb.jpg)
 
-将鼠标移到对应的指针上，会显示出课程的名称以及当前的选课的热门程度，数字越大越热门，预选被踢的可能性就越大，反之。
 
-推荐选择热门程度为0.8-1之间的课程，避免人数过少而不开课，或是人数过多被踢导致要参加惨无人道的抢课大战。
 
-## 注意
-
-教务系统选课的那个ip有时会变呀。。但基本上就是最后一位变一下，可以先自己用浏览器登录一遍确认一下ip，变了就修改一下就好。然后更改一下自己要爬取的页数就好。
 
 
