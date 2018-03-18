@@ -4,15 +4,18 @@
 # License: MIT
 # ---------------------------
 import json
+from math import floor
+
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
 from bs4 import BeautifulSoup
+from selenium.webdriver.chrome.options import Options
+from terminaltables import AsciiTable
 import re
 import pygal
-from selenium.webdriver.chrome.options import Options
 
 
 class Student():
@@ -36,7 +39,6 @@ class Student():
         return list(self.browser.current_url)[20]
 
     def __login(self):
-        print('正在登陆...')
         self.browser.get(self.login_url)
         user = WebDriverWait(self.browser, 5).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, "#username"))
@@ -58,63 +60,103 @@ class Student():
             exit()
 
     def get_personal_info(self):
-        print('正在跳转个人信息页面...')
-        self.personal_info = {}
         self.browser.get('http://' + self.today_url + '/xsgrxx.aspx?xh=' + self.username + '&gnmkdm=N121501')
         html = self.browser.page_source
-        self.personal_info["student_number"] = re.findall('<td><span id="xh">(.*?)</span></td>', html, re.S),
-        self.personal_info["photo"] = re.findall(
-            '<td rowspan="6"><img id="xszp" src="(.*?)" alt="照片" align="AbsMiddle"', html,
-            re.S),
-        self.personal_info["name"] = re.findall('<td><span id="xm">(.*?)</span></td>', html, re.S),
-        self.personal_info["sex"] = re.findall('<td><span id="lbl_xb">(.*?)</span></td>', html, re.S),
-        self.personal_info["enrollment_date"] = re.findall('<td colspan="2"><span id="lbl_rxrq">(.*?)</span></td>',
-                                                           html, re.S),
-        self.personal_info["birth_date"] = re.findall('<td><span id="lbl_csrq">(.*?)</span></td>', html, re.S),
-        self.personal_info["middle_school"] = re.findall('<td colspan="2"><span id="lbl_byzx">(.*?)</span></td>',
-                                                         html, re.S),
-        self.personal_info["nation"] = re.findall('<td><span id="lbl_mz">(.*?)</span></td>', html, re.S),
-        self.personal_info["origin"] = re.findall('</span><span id="lbl_jg">(.*?)</span></td>', html, re.S),
-        self.personal_info["political_status"] = re.findall('<span id="lbl_zzmm">(.*?)</span></td>', html, re.S),
-        self.personal_info["phone"] = re.findall('<span id="lbl_lxdh">(.*?)</span></td>', html, re.S),
-        self.personal_info["source_area"] = re.findall('<span id="lbl_lys">(.*?)</span></td>', html, re.S),
-        self.personal_info["exam_number"] = re.findall('<span id="lbl_zkzh">(.*?)</span></td>', html, re.S),
-        self.personal_info["birth_palce"] = re.findall('<span id="lbl_csd">(.*?)</span></td>', html, re.S),
-        self.personal_info["id_number"] = re.findall('<span id="lbl_sfzh">(.*?)</span></td>', html, re.S),
-        self.personal_info["academic_level"] = re.findall('<span id="lbl_CC">(.*?)</span></td>', html, re.S),
-        self.personal_info["institute"] = re.findall('<span id="lbl_xy">(.*?)</span></td>', html, re.S),
-        self.personal_info["home_place"] = re.findall('<span id="lbl_jtszd">(.*?)</span></td>', html, re.S),
-        self.personal_info["major"] = re.findall('<span id="lbl_zymc">(.*?)</span></td>', html, re.S),
-        self.personal_info["class"] = re.findall('<span id="lbl_xzb">(.*?)</span></td>', html, re.S),
-        self.personal_info["english_score"] = re.findall('<span id="lbl_YYCJ">(.*?)</span></td>', html, re.S),
-        self.personal_info["study_year"] = re.findall('<span id="lbl_xz">(.*?)</span></td>', html, re.S),
-        self.personal_info["student_status"] = re.findall('<span id="lbl_xjzt">(.*?)</span></td>', html, re.S),
-        self.personal_info["grade"] = re.findall('<span id="lbl_dqszj">(.*?)</span></td>', html, re.S),
-        self.personal_info["candidate_number"] = re.findall('<span id="lbl_ksh">(.*?)</span></td>', html, re.S)
-
-        for key, item in self.personal_info.items():
-            print(key + ': ' + str(item[0]))
+        bsobj = BeautifulSoup(html, 'lxml')
+        personal_info = bsobj.find('table', {'class': 'formlist'})
+        infos_spliter = re.findall('<td.*?>(.*?)</td>', str(personal_info), re.S)
+        infos_spliter_attr = re.findall('<span id="lbxsgrxx_.*?>(.*?)：</span>', str(infos_spliter), re.S)
+        infos_spliter_index = re.findall('<span id="(?:lbl.*?|xh|xm).*?>(.*?)</span>', str(infos_spliter), re.S)
+        # add zmr
+        infos_spliter_index.insert(-3, '')
+        self.personal_info = dict(zip(infos_spliter_attr, infos_spliter_index))
         return self.personal_info
 
+    def show_personal_info(self):
+        try:
+            table_data_1 = [
+                [i for i in self.personal_info.keys()][0:10],
+                [i for i in self.personal_info.values()][0:10]
+            ]
+            table_data_2 = [
+                [i for i in self.personal_info.keys()][10:20],
+                [i for i in self.personal_info.values()][10:20]
+            ]
+            table_data_3 = [
+                [i for i in self.personal_info.keys()][20:30],
+                [i for i in self.personal_info.values()][20:30]
+            ]
+            table_data_4 = [
+                [i for i in self.personal_info.keys()][30:40],
+                [i for i in self.personal_info.values()][30:40]
+            ]
+            table_data_5 = [
+                [i for i in self.personal_info.keys()][40:50],
+                [i for i in self.personal_info.values()][40:50]
+            ]
+            table_data_6 = [
+                [i for i in self.personal_info.keys()][50:60],
+                [i for i in self.personal_info.values()][50:60]
+            ]
+            table_1 = AsciiTable(table_data_1)
+            table_2 = AsciiTable(table_data_2)
+            table_3 = AsciiTable(table_data_3)
+            table_4 = AsciiTable(table_data_4)
+            table_5 = AsciiTable(table_data_5)
+            table_6 = AsciiTable(table_data_6)
+            for i in range(1, 7):
+                print(eval('table_' + str(i) + '.table'))
+
+        except AttributeError:
+            print('## get_personal_info should be run first. ##')
+
     def get_class_table(self):
-        print('正在跳转专业课表...')
         self.browser.get('http://' + self.today_url + '/tjkbcx.aspx?xh=' + self.username + '&gnmkdm=N121601')
-        print('正在采集')
         html = self.browser.page_source
         bsobj = BeautifulSoup(html, 'lxml')
-        infos = bsobj.find_all('table', {'id': 'Table6'})
-        for info in infos:
-            class_table = info.get_text()
-            # print(info.get_text())
-        self.class_table = class_table.replace('\xa0', ' , ')
-        print(self.class_table)
-        return self.class_table
+        self.class_table = bsobj.find('table', {'id': 'Table6'})
+        infos_spliter = re.findall('<td.*?>(.*?)</td>', str(self.class_table), re.S)
+        index_list = []
+        for index, item in enumerate(infos_spliter):
+            if item in ['早晨', '第1节', '第2节', '第3节', '第4节', '第5节', '第6节', '第7节', '第8节', '第9节', '第10节']:
+                index_list.append(index)
+
+        rep = {'<br/>': '\n', '<font color="red">': '', '</font>': '', '第3节': '第2节', '第5节': '第3节', '第7节': '第4节',
+               '第9节': '第5节'}
+        for t in range(len(infos_spliter)):
+            for i, j in rep.items():
+                infos_spliter[t] = infos_spliter[t].replace(i, j)
+
+        class_table_dict = {
+            'time': infos_spliter[0:8],
+            'morning': infos_spliter[index_list[0]:index_list[1] - 1],
+            'first': infos_spliter[index_list[1]:index_list[2] - 1],
+            'second': infos_spliter[index_list[3]:index_list[4] - 1],
+            'third': infos_spliter[index_list[5]:index_list[6] - 1],
+            'forth': infos_spliter[index_list[7]:index_list[8] - 1],
+            'fifth': infos_spliter[index_list[9]:index_list[10] - 1]
+        }
+        self.class_table = class_table_dict
+
+    def show_class_table(self):
+        try:
+            table_data = [
+                [i for i in self.class_table["time"]],
+                [i for i in self.class_table["morning"]],
+                [i for i in self.class_table["first"]],
+                [i for i in self.class_table["second"]],
+                [i for i in self.class_table["third"]],
+                [i for i in self.class_table["forth"]],
+                [i for i in self.class_table["fifth"]]
+
+            ]
+            table = AsciiTable(table_data)
+            print(table.table)
+        except AttributeError:
+            print('## get_class_table should be run first. ##')
 
     def get_personal_score(self):
-
-        print('正在跳转成绩表...')
         self.browser.get('http://' + self.today_url + '/xscj_gc.aspx?xh=' + self.username + '&gnmkdm=N121605')
-        print('正在采集')
         ask = WebDriverWait(self.browser, 10).until(
             EC.element_to_be_clickable((By.CSS_SELECTOR, "#Button2"))
         )
@@ -126,17 +168,41 @@ class Student():
         grade = []
         for item in infos:
             grade.append(item.get_text())
-
         score_info = []
-
         for i in range(0, len(grade), 15):
             score_info.append(grade[i:i + 15])
-            print(grade[i:i + 15])
         self.score_info = score_info
+        self.jidian = re.findall('平均学分绩点：(.*?)</b>', html, re.S)[0]
         return self.score_info
 
+    def show_personal_score(self):
+        try:
+            table_data = self.score_info
+            table = AsciiTable(table_data)
+            print(table.table)
+
+        except AttributeError:
+            print('## get_personal_score should be run first. ##')
+
+    def show_jidian(self):
+        try:
+            print('绩点: ' + str(self.jidian))
+        except AttributeError:
+            print('## get_personal_score should be run first. ##')
+
+    def score_to_GPA(self):
+        try:
+            mult_info = []
+            for i in range(1, len(self.score_info)):
+                if floor(float(self.score_info[i][7])) == 5:
+                    self.score_info[i][7] = 4
+                mult_info.append(floor(float(self.score_info[i][7])))
+            self.GPA = round(sum(mult_info) / (len(mult_info)), 2)
+            print('GPA: ' + str(self.GPA))
+        except AttributeError:
+            print('## get_personal_score should be run first. ##')
+
     def get_pre_class_picked(self):
-        print('正在跳转选课系统...')
         self.browser.get('http://' + self.today_url + '/xf_xsqxxxk.aspx?xh=' + self.username)
         item_num = WebDriverWait(self.browser, 1000).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, "#dpkcmcGrid_txtPageSize")))
@@ -148,11 +214,9 @@ class Student():
                     print(item)
                 html = self.__next_page()
         except TimeoutException:
-            print("课程信息获取完成")
             self.gauge_chart.render_in_browser()
 
     def __parse_page(self, html):
-        print('正在采集...')
         class_infos_pattern = re.compile("<tr(.*?)</tr>", re.S)
         class_infos = re.findall(class_infos_pattern, html)
         try:
@@ -184,9 +248,12 @@ class Student():
             f.close()
 
     def __next_page(self):
-        print('正在翻页...')
         next = WebDriverWait(self.browser, 10).until(
             EC.element_to_be_clickable((By.CSS_SELECTOR, "#dpkcmcGrid_btnNextPage")))
         next.click()
         html = self.browser.page_source
         return html
+
+    def exit(self):
+        self.browser.quit()
+        exit()

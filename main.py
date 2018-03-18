@@ -1,7 +1,16 @@
 from spider import Student
 
 if __name__ == '__main__':
-    student = Student('your_username', 'your_password')
+    # initialize
+    student = Student('username', 'password')
     student.get_personal_info()
+    student.show_personal_info()
     student.get_class_table()
     student.get_personal_score()
+    student.show_jidian()
+    student.score_to_GPA()
+    student.show_personal_score()
+    student.show_class_table()
+
+    # Don't forget this
+    student.exit()
