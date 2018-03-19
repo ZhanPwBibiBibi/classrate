@@ -9,6 +9,7 @@
 * [x] 个人成绩Pretty Print
 * [x] 专业课表Pretty Print
 * [x] 将5分制绩点换算为4分制GPA
+* [ ] pdf格式成绩单输出
 
 
 
