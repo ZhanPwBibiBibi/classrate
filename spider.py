@@ -17,6 +17,14 @@ from terminaltables import AsciiTable
 import re
 import pygal
 
+from reportlab.pdfgen.canvas import Canvas
+from reportlab.pdfbase import pdfmetrics
+from reportlab.lib.units import inch, cm
+from reportlab.lib.pagesizes import A4
+from reportlab.pdfbase.cidfonts import UnicodeCIDFont
+
+pdfmetrics.registerFont(UnicodeCIDFont('STSong-Light'))
+
 
 class Student():
     """Spider for GZHU FangZheng system"""
@@ -110,6 +118,129 @@ class Student():
         except AttributeError:
             print('## get_personal_info should be run first. ##')
 
+    def score_pdf_generate(self):
+        c = Canvas('score_list.pdf', pagesize=A4)
+        width, height = A4  # keep for later
+        # initialize paper
+        c.drawImage('GZHU_title.png', 90, 740, width=13 * cm, height=2.3 * cm, mask=None)
+        c.setStrokeColorRGB(1, 0, 0)
+        c.line(60, 735, 545, 735)
+        c.drawImage('GZHU_seal.png', 410, 75, width=4 * cm, height=3 * cm, mask=None)
+        c.setStrokeColorRGB(1, 0, 0)
+        c.line(60, 60, 545, 60)
+
+        c.setFont('STSong-Light', 12)
+        c.drawString(width / 2 - 1.5 * cm, 720, '学生学业成绩表')
+
+        c.setFont('STSong-Light', 9)
+        c.drawString(70, 700, '学号:  ')
+        c.drawString(190, 700, '姓名:  ' + self.personal_info['姓名'])
+        c.drawString(310, 700, '出生日期:  ')
+        c.drawString(450, 700, '学制:  ')
+        c.drawString(70, 685, '专业:   ' + self.personal_info['专业名称'])
+        c.drawString(310, 685, '在校学习起止年月:  ')
+        c.drawString(420, 685, '至')
+        c.drawString(485, 700, '年')
+        c.drawString(120, 665, '课程名称')
+        c.drawString(240, 665, '学分')
+        c.drawString(270, 665, '成绩')
+        c.drawString(370, 665, '课程名称')
+        c.drawString(490, 665, '学分')
+        c.drawString(520, 665, '成绩')
+        c.drawString(270, 30, '第  1  页/共  1  页')
+
+        c.setFont('Times-Roman', 9)
+        c.drawString(95, 700, self.personal_info['学号'])
+        c.drawString(350, 700, self.personal_info['出生日期'])
+        c.drawString(480, 700, self.personal_info['学制'])
+        c.drawString(390, 685, self.personal_info['入学日期'][0:4] + '-' + self.personal_info['入学日期'][4:6])
+        c.drawString(430, 685, str(int(self.personal_info['入学日期'][0:4]) + int(self.personal_info['学制'])) + '-' +
+                     '07')
+
+        # draw score
+        c.setFont('STSong-Light', 8)
+        count = 0
+        bias = 0
+        bias_2 = 0
+        current_year = ''
+        current_term = ''
+        for i in range(1, len(self.score_info) - 1):
+
+            if count < 43:
+                if current_year != self.score_info[i][0] or current_term != self.score_info[i][1]:
+
+                    c.setFont('Times-Roman', 8)
+                    c.drawString(80, 650 - bias, self.score_info[i][0])
+                    c.drawString(145, 650 - bias, self.score_info[i][1])
+                    c.setFont('STSong-Light', 8)
+                    c.drawString(75, 650 - bias, '(')
+                    c.drawString(120, 650 - bias, '学年第')
+                    c.drawString(150, 650 - bias, '学期')
+                    c.drawString(170, 650 - bias, ')')
+
+                    current_year = self.score_info[i][0]
+                    current_term = self.score_info[i][1]
+                    bias = bias + 13
+                    count = count + 1
+
+                c.setFont('STSong-Light', 8)
+                c.drawString(70, 650 - bias, self.score_info[i][3])
+                if self.score_info[i][8] in ['优', '良', '中', '差']:
+                    c.drawString(275, 650 - bias, self.score_info[i][8])
+                else:
+                    c.setFont('Times-Roman', 8)
+                    c.drawString(275, 650 - bias, self.score_info[i][8])
+                c.setFont('Times-Roman', 8)
+                c.drawString(243, 650 - bias, self.score_info[i][6])
+                bias = bias + 13
+                count = count + 1
+            else:
+                if current_year != self.score_info[i][0] or current_term != self.score_info[i][1]:
+
+                    c.setFont('Times-Roman', 8)
+                    c.drawString(330, 650 - bias_2, self.score_info[i][0])
+                    c.drawString(395, 650 - bias_2, self.score_info[i][1])
+                    c.setFont('STSong-Light', 8)
+                    c.drawString(325, 650 - bias_2, '(')
+                    c.drawString(370, 650 - bias_2, '学年第')
+                    c.drawString(400, 650 - bias_2, '学期')
+                    c.drawString(420, 650 - bias_2, ')')
+
+                    current_year = self.score_info[i][0]
+                    current_term = self.score_info[i][1]
+                    bias_2 = bias_2 + 13
+                    count = count + 1
+
+                c.setFont('STSong-Light', 8)
+                c.drawString(320, 650 - bias_2, self.score_info[i][3])
+                if self.score_info[i][8] in ['优', '良', '中', '差']:
+                    c.drawString(525, 650 - bias_2, self.score_info[i][8])
+                else:
+                    c.setFont('Times-Roman', 8)
+                    c.drawString(525, 650 - bias_2, self.score_info[i][8])
+                c.setFont('Times-Roman', 8)
+                c.drawString(493, 650 - bias_2, self.score_info[i][6])
+                bias_2 = bias_2 + 13
+                count = count + 1
+            c.setFont('STSong-Light', 8)
+        if count < 39 :
+            ver_bias = bias
+            hor_bias = 250
+        else:
+            ver_bias = bias_2
+            hor_bias = 0
+        c.drawString(320-hor_bias, 650 - ver_bias, '***************************成绩单总计***************************')
+        c.drawString(320-hor_bias, 650 - ver_bias - 39, '****************************以下空白****************************')
+        c.drawString(320-hor_bias, 650 - ver_bias - 13, '已获总学分:  ')
+        c.drawString(320-hor_bias, 650 - ver_bias - 26, '平均学分绩点（                ）:  ')
+        c.setFont('Times-Roman', 8)
+        c.drawString(378-hor_bias, 650 - ver_bias - 26, '0.0-5.0')
+        c.drawString(370-hor_bias, 650 - ver_bias - 13, self.xuefen)
+        c.drawString(420-hor_bias, 650 - ver_bias - 26, self.jidian)
+
+        c.save()
+        c.showPage()
+
     def get_class_table(self):
         self.browser.get('http://' + self.today_url + '/tjkbcx.aspx?xh=' + self.username + '&gnmkdm=N121601')
         html = self.browser.page_source
@@ -170,9 +301,13 @@ class Student():
             grade.append(item.get_text())
         score_info = []
         for i in range(0, len(grade), 15):
+            if grade[i + 6] in ['0', '1', '2', '3', '4', '5']:
+                grade[i + 6] = grade[i + 6] + '.0'
             score_info.append(grade[i:i + 15])
         self.score_info = score_info
+
         self.jidian = re.findall('平均学分绩点：(.*?)</b>', html, re.S)[0]
+        self.xuefen = re.findall('获得学分(.*?)；', html, re.S)[0]
         return self.score_info
 
     def show_personal_score(self):

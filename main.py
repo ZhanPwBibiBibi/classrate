@@ -11,6 +11,7 @@ if __name__ == '__main__':
     student.score_to_GPA()
     student.show_personal_score()
     student.show_class_table()
+    student.score_pdf_generate()
 
     # Don't forget this
     student.exit()
