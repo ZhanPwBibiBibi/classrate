@@ -9,12 +9,7 @@
 * [x] 个人成绩Pretty Print
 * [x] 专业课表Pretty Print
 * [x] 将5分制绩点换算为4分制GPA
-* [ ] pdf格式成绩单输出
-
-
-
-<!-- more -->
-
+* [x] 生成PDF格式的成绩单
 
 
 ## What you need
@@ -26,14 +21,16 @@
 
 * 然后确保你已经正确安装了如下版本的包：
 
-    ```
+    ```python
     # requirements.txt:
-    beautifulsoup4==4.5.3
-    pygal==2.4.0
-    selenium==3.4.3
+    beautifulsoup4>=4.5.3
+    pygal>=2.4.0
+    selenium>=3.4.3
+    terminaltables>=3.1.0
+    reportlab>=3.4.0
     ```
 
-然后，下一步就可以开始使用啦！
+在确保所需要的第三方库都顺利安装之后就可以直接使用了，推荐在终端中运行（Pretty Print支持）。
 
 ```bash
 # 在终端下使用将会有更加格式化的输出
@@ -58,10 +55,14 @@ student.show_personal_score() # 以表格方式显示个人成绩 Pretty print p
 student.show_jidian() # 获取绩点 Show 5-point GPA(jidian)
 student.score_to_GPA() # 将分数转换为GPA Convert 5-point GPA(jidian) to 4-point GPA
 
+student.score_pdf_generate() # 生成PDF格式的成绩单，输出为score_list.pdf Generate score list in PDF format and output as score_list.pdf
+
 # 获取全校预选课情况，只有当预选课系统开放的时候才有用 
 # Get pre-selection infos.
 # Only can be used when the pre-selection system is open.
-student.get_pre_class_picked() 
+# student.get_pre_class_picked() 
+
+
 
 
 # Don't forget this
