@@ -168,7 +168,6 @@ class Student():
 
             if count < 43:
                 if current_year != self.score_info[i][0] or current_term != self.score_info[i][1]:
-
                     c.setFont('Times-Roman', 8)
                     c.drawString(80, 650 - bias, self.score_info[i][0])
                     c.drawString(145, 650 - bias, self.score_info[i][1])
@@ -196,7 +195,6 @@ class Student():
                 count = count + 1
             else:
                 if current_year != self.score_info[i][0] or current_term != self.score_info[i][1]:
-
                     c.setFont('Times-Roman', 8)
                     c.drawString(330, 650 - bias_2, self.score_info[i][0])
                     c.drawString(395, 650 - bias_2, self.score_info[i][1])
@@ -223,23 +221,79 @@ class Student():
                 bias_2 = bias_2 + 13
                 count = count + 1
             c.setFont('STSong-Light', 8)
-        if count < 39 :
+        if count < 39:
             ver_bias = bias
             hor_bias = 250
         else:
             ver_bias = bias_2
             hor_bias = 0
-        c.drawString(320-hor_bias, 650 - ver_bias, '***************************成绩单总计***************************')
-        c.drawString(320-hor_bias, 650 - ver_bias - 39, '****************************以下空白****************************')
-        c.drawString(320-hor_bias, 650 - ver_bias - 13, '已获总学分:  ')
-        c.drawString(320-hor_bias, 650 - ver_bias - 26, '平均学分绩点（                ）:  ')
+        c.drawString(320 - hor_bias, 650 - ver_bias, '***************************成绩单总计***************************')
+        c.drawString(320 - hor_bias, 650 - ver_bias - 39,
+                     '****************************以下空白****************************')
+        c.drawString(320 - hor_bias, 650 - ver_bias - 13, '已获总学分:  ')
+        c.drawString(320 - hor_bias, 650 - ver_bias - 26, '平均学分绩点（                ）:  ')
         c.setFont('Times-Roman', 8)
-        c.drawString(378-hor_bias, 650 - ver_bias - 26, '0.0-5.0')
-        c.drawString(370-hor_bias, 650 - ver_bias - 13, self.xuefen)
-        c.drawString(420-hor_bias, 650 - ver_bias - 26, self.jidian)
+        c.drawString(378 - hor_bias, 650 - ver_bias - 26, '0.0-5.0')
+        c.drawString(370 - hor_bias, 650 - ver_bias - 13, self.xuefen)
+        c.drawString(420 - hor_bias, 650 - ver_bias - 26, self.jidian)
 
         c.save()
         c.showPage()
+
+    def __get_score_page(self):
+        self.browser.get('http://' + self.today_url + '/xscj_gc.aspx?xh=' + self.username + '&gnmkdm=N121605')
+        ask = WebDriverWait(self.browser, 10).until(
+            EC.element_to_be_clickable((By.CSS_SELECTOR, "#Button2"))
+        )
+        ask.click()
+
+        html = self.browser.page_source
+
+        return html
+
+    def get_personal_credit_required(self):
+        html = self.__get_score_page()
+        bsobj = BeautifulSoup(html, 'lxml')
+
+        infos = bsobj.find_all('table', {'id': 'Datagrid2'})
+        infos_spliter = re.findall('<td>(.*?)</td>', str(infos), re.S)
+        credit = []
+        for i in range(0, len(infos_spliter), 5):
+            infos_spliter[i] = infos_spliter[i].replace('<b>合计</b>', '合计')
+            credit.append(infos_spliter[i:i + 5])
+        self.credit_required = credit
+        return self.credit_required
+
+    def get_personal_credit_electives(self):
+        html = self.__get_score_page()
+        bsobj = BeautifulSoup(html, 'lxml')
+
+        infos = bsobj.find_all('table', {'id': 'DataGrid6'})
+        infos_spliter = re.findall('<td>(.*?)</td>', str(infos), re.S)
+        credit = []
+        for i in range(0, len(infos_spliter), 5):
+            infos_spliter[i] = infos_spliter[i].replace('<b>合计</b>', '合计')
+            credit.append(infos_spliter[i:i + 5])
+        self.credit_electives = credit
+        return self.credit_electives
+
+    def show_credit_required(self):
+        try:
+            table_data = self.credit_required
+            table = AsciiTable(table_data)
+            print(table.table)
+
+        except AttributeError:
+            print('## get_personal_credit_required should be run first. ##')
+
+    def show_credit_electives(self):
+        try:
+            table_data = self.credit_electives
+            table = AsciiTable(table_data)
+            print(table.table)
+
+        except AttributeError:
+            print('## get_personal_credit_electives should be run first. ##')
 
     def get_class_table(self):
         self.browser.get('http://' + self.today_url + '/tjkbcx.aspx?xh=' + self.username + '&gnmkdm=N121601')
@@ -287,13 +341,7 @@ class Student():
             print('## get_class_table should be run first. ##')
 
     def get_personal_score(self):
-        self.browser.get('http://' + self.today_url + '/xscj_gc.aspx?xh=' + self.username + '&gnmkdm=N121605')
-        ask = WebDriverWait(self.browser, 10).until(
-            EC.element_to_be_clickable((By.CSS_SELECTOR, "#Button2"))
-        )
-        ask.click()
-
-        html = self.browser.page_source
+        html = self.__get_score_page()
         bsobj = BeautifulSoup(html, 'lxml')
         infos = bsobj.tbody.find_all('td')
         grade = []
