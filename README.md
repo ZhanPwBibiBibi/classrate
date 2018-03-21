@@ -10,6 +10,8 @@
 * [x] 专业课表Pretty Print
 * [x] 将5分制绩点换算为4分制GPA
 * [x] 生成PDF格式的成绩单
+* [x] 获取必修课学分
+* [x] 获取选修课学分
 
 
 ## What you need
@@ -56,6 +58,11 @@ student.show_jidian() # 获取绩点 Show 5-point GPA(jidian)
 student.score_to_GPA() # 将分数转换为GPA Convert 5-point GPA(jidian) to 4-point GPA
 
 student.score_pdf_generate() # 生成PDF格式的成绩单，输出为score_list.pdf Generate score list in PDF format and output as score_list.pdf
+
+student.get_personal_credit_required() # 获取必修课学分 Get required classes credit
+student.get_personal_credit_electives() # 获取选修课学分 Get electives classes credit
+student.show_credit_required() # 以表格方式显示必修课学分 Pretty print required classes credit in ASCII table
+student.show_credit_electives() # 以表格方式显示选修课学分 Pretty print electives classes credit in ASCII table
 
 # 获取全校预选课情况，只有当预选课系统开放的时候才有用 
 # Get pre-selection infos.
