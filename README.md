@@ -9,22 +9,24 @@
 * [x] 个人成绩Pretty Print
 * [x] 专业课表Pretty Print
 * [x] 将5分制绩点换算为4分制GPA
-* [x] 生成PDF格式的成绩单
+* [x] 生成PDF格式的成绩单（官方样式）
 * [x] 获取必修课学分
 * [x] 获取选修课学分
+* [ ] 获取选修课课程信息
 
 
 ## What you need
 * 本项目在 Python 3.6 下通过测试, 其他版本未测试。
 
-* 首先确保你以及正确配置了*Webdriver for Chrome*，如果未安装，点[这里](https://docs.seleniumhq.org/projects/webdriver/)了解更多。 
+* 首先确保你以及正确配置了最新版本的*Webdriver for Chrome*，如果未安装，点[这里](https://docs.seleniumhq.org/projects/webdriver/)了解更多。 
 
 * 并且Chrome的版本在64以上，Chrome版本太低将不支持*headless mode*。
 
 * 然后确保你已经正确安装了如下版本的包：
 
-    ```python
+    ```
     # requirements.txt:
+    
     beautifulsoup4>=4.5.3
     pygal>=2.4.0
     selenium>=3.4.3
@@ -77,6 +79,31 @@ student.exit()
     
 ```
 
+## Output
+以下输出图片中的关键信息已经遮挡。所有输出均为在terminal中的显示效果（PDF除外）。
+1. 获取个人信息，在终端中运行，将会得到如下的表格，图中只截取了一部分。
+
+    ![](pic/info.png)
+    
+2. 获取专业课表。
+
+    ![](pic/table.png)
+    
+3. 获取个人成绩。
+
+    ![](pic/score.png)
+   
+4. 获取必修课学分。
+
+    ![](pic/credit_req.png)
+
+5. 获取选修课学分。
+
+    ![](pic/credit_ele.png)
+    
+6. 输出PDF格式成绩单。(本成绩单样式与官方成绩单相同，经过精确匹配，但仅做参考使用～)
+
+    ![](pic/score_list.png)
 
 ## License
 MIT
