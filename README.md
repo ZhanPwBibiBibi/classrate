@@ -1,4 +1,9 @@
 # classrate
+
+
+[![license](https://img.shields.io/github/license/mashape/apistatus.svg)](https://github.com/ZhanPwBibiBibi/classrate/blob/master/LICENSE.md)
+
+
 本项目主要用于广州大学GZHU教务系统的信息抓取。（暂未适配其他学校的教务系统，如有机会会逐渐适配）可用于： 
 
 * [x] 在预选课阶段获取全校预选课信息
